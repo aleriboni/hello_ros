@@ -29,17 +29,13 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 
-#include <sstream>
 /**
  * This tutorial demonstrates simple receipt of messages over the ROS system.
  */
 // %Tag(CALLBACK)%
-int count = 0;
-
 void chatterCallback(const std_msgs::String::ConstPtr& msg)
 {
-  ROS_INFO("I heard: [%s], count %i", msg->data.c_str(), count);
-  count++;
+  ROS_INFO("I heard: [%s]", msg->data.c_str());
 }
 // %EndTag(CALLBACK)%
 
@@ -55,7 +51,7 @@ int main(int argc, char **argv)
    * You must call one of the versions of ros::init() before using any other
    * part of the ROS system.
    */
-  ros::init(argc, argv, "listener");
+  ros::init(argc, argv, "ten");
 
   /**
    * NodeHandle is the main access point to communications with the ROS system.
@@ -63,7 +59,7 @@ int main(int argc, char **argv)
    * NodeHandle destructed will close down the node.
    */
   ros::NodeHandle n;
-  ros::NodeHandle n2;
+
   /**
    * The subscribe() call is how you tell ROS that you want to receive messages
    * on a given topic.  This invokes a call to the ROS
@@ -80,32 +76,14 @@ int main(int argc, char **argv)
    * away the oldest ones.
    */
 // %Tag(SUBSCRIBER)%
-  ros::Subscriber sub = n.subscribe("chatter", 1000, chatterCallback);
-  ros::Publisher pub = n2.advertise<std_msgs::String>("filtered", 1000);
+  ros::Subscriber sub = n.subscribe("filtered", 1000, chatterCallback);
 // %EndTag(SUBSCRIBER)%
-  ros::Rate loop_rate(10);
 
-  while (ros::ok())
-  {
-    std_msgs::String msg;
-
-    std::stringstream ss;
-    ss << "Mi sono arrivati 10 messaggi";
-    msg.data = ss.str();
-
-    if (count == 10){
-      pub.publish(msg);
-      count = 0;
-    }
-  // %Tag(SPINONCE)%
-      ros::spinOnce();
-  // %EndTag(SPINONCE)%
-
-  // %Tag(RATE_SLEEP)%
-      loop_rate.sleep();
-  // %EndTag(RATE_SLEEP)%
-}
-
+  /**
+   * ros::spin() will enter a loop, pumping callbacks.  With this version, all
+   * callbacks will be called from within this thread (the main one).  ros::spin()
+   * will exit when Ctrl-C is pressed, or the node is shutdown by the master.
+   */
 // %Tag(SPIN)%
   ros::spin();
 // %EndTag(SPIN)%
